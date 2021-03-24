@@ -1,4 +1,4 @@
-function [cExt, cSpec] = func_signalcut (path, filename)
+function [cExt, cSpec] = func_signalcut_xaxis (path, filename)
 
 %% Parameter Setting
 numVib = 3;
@@ -17,20 +17,14 @@ hp_data = highpass(data, 150, rate);               % highpass filtering을 진�
 hp_data = lowpass(hp_data, 200, rate);
 hp_data = hp_data(rate* 0.03 : end - rate*0.02,:);  % 맨앞이랑 맨뒤에 튀는 값이 생겨서 임시로 잘라둠
 
-% figure()
-% plot(hp_data(:,3))
-% title('z')
-% figure()
-% plot(hp_data(:,2))
-% title('y')
-% figure()
-% plot(hp_data(:,1))
-% title('x')
-
 % target에 highpass filtering을 거친 후의 hp_data를 대입
 target = hp_data(:, 3);             % zout_scaled
 target = target - mean(target);     % 각 요소-전체의 평균(편차)
 target = target ./ max(target);     % 편차 / 최대편차
+
+target_x = hp_data(:, 1);             % xout_scaled
+target_x = target_x - mean(target_x);     % 각 요소-전체의 평균(편차)
+target_x = target_x ./ max(target_x);     % 편차 / 최대편차
 
 % highpass filtering 진행한 이후, accel vector의 크기(x*x + y*y + z*z)를 값으로 갖는 벡터(vecSize) 생성
 vecSize = zeros(max(size(target)), 1);
@@ -56,7 +50,7 @@ cSpec = zeros(numVib, coarseInterval/2);
 count = count + 10;
 
 for cnt = 1:numVib
-    cExt(cnt, :) = target(locs(count) + rate * 1.4 + (cnt-1) * rate * (vibLength + 1) + (1:coarseInterval)); 
+    cExt(cnt, :) = target_x(locs(count) + rate * 1.4 + (cnt-1) * rate * (vibLength + 1) + (1:coarseInterval)); 
     cSpec(cnt, :) = vibFFT(cExt(cnt, :));
 end
 
