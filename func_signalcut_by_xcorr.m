@@ -4,8 +4,8 @@ numVib = 3;
 vibLength = 1.44;       % 진동의 길이
 rate = 1500;
 
-lowFreqCut = 150;
-highFreqCut = 190;
+lowFreqCut = 80;
+highFreqCut = 350;
 %% Read data and get Target
 raw = csvread([path, filename], 1, 4);          % (1,4)열 가져옴
 
