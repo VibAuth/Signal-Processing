@@ -1,11 +1,11 @@
-function [x_slice, y_slice, z_slice, xSpec, ySpec, zSpec] = func_signalcut_by_xcorr (path, filename, signal, coarseInterval)
+function [x_slice, y_slice, z_slice, xSpec, ySpec, zSpec] = func_signalcut_by_conv (path, filename, signal, coarseInterval)
 %% Parameter Setting
 numVib = 3;
 vibLength = 1.44;       % 진동의 길이
 rate = 1500;
 
-lowFreqCut = 80;
-highFreqCut = 350;
+lowFreqCut = 140;
+highFreqCut = 190;
 %% Read data and get Target
 raw = csvread([path, filename], 1, 4);          % (1,4)열 가져옴
 
@@ -18,8 +18,6 @@ data = data(rate * 1.65 :end - rate * 0.1, :);               % 앞뒤 sleep time �
 hp_data = filtfilt(b, a, data);
 [b, a] = butter(8, highFreqCut / rate * 2, 'low');
 hp_data = filtfilt(b, a, hp_data);
-
-hp_data = hp_data(rate* 0.03 : end - rate*0.02,:);  % 앞뒤에 튀는 값 임시로 잘라둠
 
 % Find target and Normalize
 target = hp_data(:, 3);               % axisSetting에 의해 원하는 축의 데이터를 target에 대입
@@ -38,7 +36,7 @@ target_y = target_y ./ max(target_y);
 
 convol = conv(target.^2, ones(1, 2160)');
 
-[pks, locs, w, p] = findpeaks(convol,rate,'MinPeakDistance', 2);
+[pks, locs, w, p] = findpeaks(convol,rate,'MinPeakDistance', 2.5);
 % [pks, locs, w, p] = findpeaks(convol,rate,'MinPeakDistance', 2.5, 'MinPeakHeight', threshold);
 
 % Find three peaks in original raw data time domain
@@ -53,12 +51,17 @@ xSpec = zeros(numVib, floor(coarseInterval/2));
 y_slice = zeros(numVib, coarseInterval);     % locs개 행, rate*3개 열 영행렬 생성
 ySpec = zeros(numVib, floor(coarseInterval/2));
 
-for cnt = 1:numVib
-    z_slice(cnt, :) = target(locs_original(cnt) + rate * 0.05 + (1:coarseInterval)); 
+num = 1;
+if size(locs_original) <= 3
+    num = 0;
+end
+    
+for cnt = 1:numVib 
+    z_slice(cnt, :) = target(round((locs_original(cnt+num) - vibLength - 0.15) * rate) + (1:coarseInterval));
     zSpec(cnt, :) = vibFFT(z_slice(cnt, :));
-    x_slice(cnt, :) = target_x(locs_original(cnt) + rate * 0.05 + (1:coarseInterval)); 
+    x_slice(cnt, :) = target_x(round((locs_original(cnt+num) - vibLength - 0.15) * rate) + (1:coarseInterval)); 
     xSpec(cnt, :) = vibFFT(x_slice(cnt, :));
-    y_slice(cnt, :) = target_y(locs_original(cnt) + rate * 0.05 + (1:coarseInterval)); 
+    y_slice(cnt, :) = target_y(round((locs_original(cnt+num) - vibLength - 0.15) * rate) + (1:coarseInterval)); 
     ySpec(cnt, :) = vibFFT(y_slice(cnt, :));
 end
 
