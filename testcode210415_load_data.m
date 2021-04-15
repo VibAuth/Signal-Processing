@@ -51,57 +51,25 @@ for i = 1:length(filename_list)
     cnt = cnt+3;
 end
 
-% figure('Name','Jinseon Data','NumberTitle','off');
-% for cnt = 1:45
-%     subplot(5,9,cnt)
-%     plot(js_z(cnt,:))
-% end
+%% gather all data
+nDataPerUser = length(db_zf(:,1));
+all_zf(1:nDataPerUser,:) = db_zf;
+all_zf(nDataPerUser+1:nDataPerUser*2,:) = hs_zf;
+all_zf((nDataPerUser*2)+1:nDataPerUser*3,:) = js_zf;
 
-%% Correlation
+all_xf(1:nDataPerUser,:) = db_xf;
+all_xf(nDataPerUser+1:nDataPerUser*2,:) = hs_xf;
+all_xf((nDataPerUser*2)+1:nDataPerUser*3,:) = js_xf;
 
-% gather all data
-all_zf(1:45,:) = db_zf;
-all_zf(46:90,:) = hs_zf;
-all_zf(91:135,:) = js_zf;
-figure()
-imagesc(corr(all_zf'))
-daspect([1 1 1])
-xticks(0:45:135);
-yticks(0:45:135);
-title('zaxis fft corr (140~190)')
-
-all_xf(1:45,:) = db_xf;
-all_xf(46:90,:) = hs_xf;
-all_xf(91:135,:) = js_xf;
-figure()
-imagesc(corr(all_xf'))
-daspect([1 1 1])
-xticks(0:45:135);
-yticks(0:45:135);
-title('xaxis fft corr (140~190)')
-
-all_yf(1:45,:) = db_yf;
-all_yf(46:90,:) = hs_yf;
-all_yf(91:135,:) = js_yf;
-figure()
-imagesc(corr(all_yf'))
-daspect([1 1 1])
-xticks(0:45:135);
-yticks(0:45:135);
-title('yaxis fft corr (140~190)')
+all_yf(1:nDataPerUser,:) = db_yf;
+all_yf(nDataPerUser+1:nDataPerUser*2,:) = hs_yf;
+all_yf((nDataPerUser*2)+1:nDataPerUser*3,:) = js_yf;
 
 avg_all_axis = (all_xf + all_yf + all_zf)/3;
+
 figure()
 imagesc(corr(avg_all_axis'))
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
-title('fft value avg corr (140~190)')
-
-avg_all_axis_corr = (corr(all_zf') + corr(all_xf') + corr(all_yf'))/3;
-figure()
-imagesc(avg_all_axis_corr)
-daspect([1 1 1])
-xticks(0:45:135);
-yticks(0:45:135);
-title('fft corr value avg corr (140~190)')
+title('fft value avg corr (80~350)')
