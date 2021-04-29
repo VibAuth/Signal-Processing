@@ -94,28 +94,28 @@ fprintf('user3: %d / %d \n', sum(result(nDataPerUser*2+1:nDataPerUser*3)), nData
 fprintf('accuracy : %f \n\n', sum(result)/nData );
 
 
-%% KNN Model
-i = 1;
-trainingData = [];
-for cnt = 1:9
-    trainingData = [trainingData; data(i:i+9,:)];
-    i = i+15;
-end
-for i = 1:3
-    trainingAnswer((i - 1) * 30 + (1:30)) = i;
-end
-
-i = 11;
-testData = [];
-for cnt = 1:9
-    testData = [testData; data(i:i+4,:)];
-    i = i+15;
-end
-for i = 1:3
-    testAnswer((i - 1) * 15 + (1:15)) = i;
-end
-
-knn_model = fitcknn(trainingData, trainingAnswer, 'NumNeighbors', nn_k);
-model_result = testAnswer'== predict(knn_model, testData);
-accuracy = sum(model_result)/length(testAnswer);
-fprintf('knn model accuracy : %f \n\n', accuracy);
+% %% KNN Model
+% i = 1;
+% trainingData = [];
+% for cnt = 1:9
+%     trainingData = [trainingData; data(i:i+9,:)];
+%     i = i+15;
+% end
+% for i = 1:3
+%     trainingAnswer((i - 1) * 30 + (1:30)) = i;
+% end
+% 
+% i = 11;
+% testData = [];
+% for cnt = 1:9
+%     testData = [testData; data(i:i+4,:)];
+%     i = i+15;
+% end
+% for i = 1:3
+%     testAnswer((i - 1) * 15 + (1:15)) = i;
+% end
+% 
+% knn_model = fitcknn(trainingData, trainingAnswer, 'NumNeighbors', nn_k);
+% model_result = testAnswer'== predict(knn_model, testData);
+% accuracy = sum(model_result)/length(testAnswer);
+% fprintf('knn model accuracy : %f \n\n', accuracy);
