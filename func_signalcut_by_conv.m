@@ -35,16 +35,18 @@ target_y = target_y - mean(target_y);
 target_y = target_y ./ max(target_y);
 
 %% Get Transfer Function and findpeaks
-convol = conv(target.^2, ones(1, 2500)');
+convol = conv(target.^2, ones(1, 2160)');
+temp = convol;
 
 % Find largest three peaks in transfer
-maxVal = prctile(convol,99);
-minVal = prctile(convol, 1);
+maxVal = prctile(temp,99);
+minVal = prctile(temp,1);
 threshold = (maxVal - minVal) * 0.1;
 
 % [pks, locs, w, p] = findpeaks(convol,rate,'MinPeakDistance', 2);
 [pks, locs, w, p] = findpeaks(convol,rate,'MinPeakDistance', 2.5, 'MinPeakHeight', threshold);
 % figure();
+% findpeaks(convol,rate,'MinPeakDistance', 2)
 % findpeaks(convol,rate,'MinPeakDistance', 2.5, 'MinPeakHeight', threshold)
 
 % Find three peaks in original raw data time domain
@@ -59,6 +61,7 @@ xSpec = zeros(numVib, floor(coarseInterval/2));
 y_slice = zeros(numVib, coarseInterval);     % locs개 행, rate*3개 열 영행렬 생성
 ySpec = zeros(numVib, floor(coarseInterval/2));
 
+% figure();
 for cnt = 1:numVib 
     z_slice(cnt, :) = target(round((locs_original(cnt) - vibLength - 0.1) * rate) + (1:coarseInterval));
 %     plot(z_slice(cnt,:))
