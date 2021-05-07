@@ -2,8 +2,9 @@
 import socket
 from os.path import exists
 import os
+import sys
 
-def run_server(directory,filename):
+def run_server(directory,fileName,fileNum):
     HOST = ''                 # Symbolic name meaning all available interfaces
     PORT = 50007              # Arbitrary non-privileged port
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,7 +14,8 @@ def run_server(directory,filename):
     
     conn, addr = s.accept()
     print('Connected by ', addr)
-    
+    conn.sendall(filenum.encode())
+
     print("file location: ", directory+"/"+filename)
     if not exists(directory+"/"+filename):
         print("file not exists")
@@ -37,6 +39,7 @@ def run_server(directory,filename):
                 while data:
                     conn.send(data)
                     data = f.read(1024)
+                print("sent ", fileName)
             except Exception as ex:
                 print(ex)
 
@@ -54,4 +57,8 @@ def getFileData(filename, directory):
     return data
 
 if __name__ == '__main__':
-    run_server(directory=str(os.getcwd()), filename="accel_data_time.csv")
+    if len(sys.argv)<3:
+        print("set filename, filenumber")
+    filename = sys.argv[1]
+    filenum = sys.argv[2]
+    run_server(directory=str(os.getcwd()), fileName=filename, fileNum=filenum)

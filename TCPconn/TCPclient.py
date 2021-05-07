@@ -3,7 +3,9 @@ import pandas as pd
 
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('192.168.137.81', 50007))
+        s.connect(('192.168.137.192', 50007))
+        fileNum = s.recv(100)
+        fileNum = fileNum.decode()
         
         reSize = s.recv(1024)
         reSize = reSize.decode()
@@ -19,7 +21,8 @@ def main():
         
         data = s.recv(1024)
         received_data = 0
-        with open('new_file.csv', 'w', encoding="UTF-8") as f:
+        filename = 'new_file_'+fileNum+'.csv'
+        with open(filename, 'w', encoding="UTF-8") as f:
             ## 파일 사이즈만큼 recv
             try:
                 while data:
@@ -29,4 +32,4 @@ def main():
             except Exception as ex:
                 print(ex)
         
-        return [fileSize, received_data]
+        return [fileSize, received_data, filename]
