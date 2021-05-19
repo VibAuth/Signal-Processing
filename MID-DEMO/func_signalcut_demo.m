@@ -1,24 +1,24 @@
 function [check, xSpec_wide, ySpec_wide, zSpec_wide] = func_signalcut_demo (path, filename, coarseInterval, numVib)
 %% Parameter Setting
-vibLength = 1.44;   % ì§„ë™ì˜ ê¸¸ì´
+vibLength = 1.44;   % Áøµ¿ÀÇ ±æÀÌ
 rate = 1500;        % Sampling rate
-check = 1;          % ì˜ˆì™¸ ì²˜ë¦¬ true
+check = 1;          % ¿¹¿Ü Ã³¸® true
 
-% ì§„ë™íŒ¨í„´ ì‹œì‘ ê¸°ì¤€ì  ì¡ê¸° ìœ„í•œ filtering ëŒ€ì—­
+% Áøµ¿ÆĞÅÏ ½ÃÀÛ ±âÁØÁ¡ Àâ±â À§ÇÑ filtering ´ë¿ª
 lowFreqCut = 140;
 highFreqCut = 190;
 
-% Harmonic frequency ëŒ€ì—­ì„ ë¶€ë¶„ ë¶€ë¶„ í•©ì¹˜ê¸° ì´ì „ filtering ëŒ€ì—­
+% Harmonic frequency ´ë¿ªÀ» ºÎºĞ ºÎºĞ ÇÕÄ¡±â ÀÌÀü filtering ´ë¿ª
 lowFreqWide = 80;
 highFreqWide = 700;
 
 %% Read data and get Target for findpeaks
-raw = csvread([path, filename],1,1);          % 1í–‰ 1ì—´ë¶€í„° ì½ê¸°
+raw = csvread([path, filename],1,1);          % 1Çà 1¿­ºÎÅÍ ÀĞ±â
 
 % Resampling
-[data, t] = resample(raw(:, 5:7), raw(:, 1)/1000, rate);    % 5~7ì—´ (xout, yout, zout)ì„, ê° ê°’ì— /1000 í•´ì„œ, ì§€ì •í•œ rateë¡œ resampling
+[data, t] = resample(raw(:, 5:7), raw(:, 1)/1000, rate);    % 5~7¿­ (xout, yout, zout)À», °¢ °ª¿¡ /1000 ÇØ¼­, ÁöÁ¤ÇÑ rate·Î resampling
 
-data = data(rate * 0.25 :end - rate * 0.1, :);      % ì•ë’¤ sleep time ìë¥´ê¸°
+data = data(rate * 0.25 :end - rate * 0.1, :);      % ¾ÕµÚ sleep time ÀÚ¸£±â
 
 % Highpass / Lowpass Filtering
 [b, a] = butter(8, lowFreqCut / rate * 2, 'high');
@@ -26,13 +26,13 @@ hp_data = filtfilt(b, a, data);
 [b, a] = butter(8, highFreqCut / rate * 2, 'low');
 hp_data = filtfilt(b, a, hp_data);
 
-hp_data = hp_data(rate* 0.03 : end - rate*0.02,:);  % ë§¨ì•ì´ë‘ ë§¨ë’¤ì— íŠ€ëŠ” ê°’ì´ ìƒê²¨ì„œ ì„ì‹œë¡œ ì˜ë¼ë‘ 
+hp_data = hp_data(rate* 0.03 : end - rate*0.02,:);  % ¸Ç¾ÕÀÌ¶û ¸ÇµÚ¿¡ Æ¢´Â °ªÀÌ »ı°Ü¼­ ÀÓ½Ã·Î Àß¶óµÒ
 
 % Normalize target(for findpeaks)
 % Z axis
-target = hp_data(:, 3);               % axisSettingì— ì˜í•´ ì›í•˜ëŠ” ì¶•ì˜ ë°ì´í„°ë¥¼ targetì— ëŒ€ì…
-target = target - mean(target);       % ê° ìš”ì†Œ - ì „ì²´ì˜ í‰ê· (í¸ì°¨)
-target = target ./ max(target);       % í¸ì°¨ / ìµœëŒ€í¸ì°¨
+target = hp_data(:, 3);               % axisSetting¿¡ ÀÇÇØ ¿øÇÏ´Â ÃàÀÇ µ¥ÀÌÅÍ¸¦ target¿¡ ´ëÀÔ
+target = target - mean(target);       % °¢ ¿ä¼Ò - ÀüÃ¼ÀÇ Æò±Õ(ÆíÂ÷)
+target = target ./ max(target);       % ÆíÂ÷ / ÃÖ´ëÆíÂ÷
 
 % Y axis
 target_x = hp_data(:, 1);               
@@ -45,24 +45,42 @@ target_y = target_y - mean(target_y);
 target_y = target_y ./ max(target_y);
 
 %% Findpeaks - Get each vibration starting points(peaks) using convol
-convol = conv(target.^2, ones(1, 2160)');
-temp = convol;
+convol_x = conv(target_x.^2, ones(1, 2160)');
+convol_y = conv(target_y.^2, ones(1, 2160)');
+convol_z = conv(target.^2, ones(1, 2160)');
+
+% Add convol. for x, y, z axis
+temp = convol_x + convol_y + convol_z
+
+% smooth data with window size of 300 for findpeaks
+temp = smoothdata(temp, 'gaussian', 300)
+
+% Figure for Debugging
+% figure('units', 'normalized', 'outerposition', [0 0 0.6 0.5]);
+% plot(convol_x);
+% hold on
+% plot(convol_y);
+% hold on
+% plot(convol_z);
+% hold on
+% plot(temp);
+% legend('x axis', 'y axis', 'z axis', 'ALL ADD')
 
 % Set thresholds for findpeaks
 maxVal = prctile(temp,99);
 minVal = prctile(temp,1);
-threshold = (maxVal - minVal) * 0.1;
+threshold = (maxVal - minVal) * 0.3;
 
 if numVib > 1
-    [pks, locs, w, p] = findpeaks(convol,rate,'MinPeakDistance', 2.5, 'MinPeakHeight', threshold);
+    [pks, locs, w, p] = findpeaks(temp,rate,'MinPeakDistance', 2.5, 'MinPeakHeight', threshold);
 else
-    [pks, locs, w, p] = findpeaks(convol,rate,'MinPeakDistance', 1.5, 'MinPeakHeight', threshold);
+    [pks, locs, w, p] = findpeaks(temp,rate,'MinPeakDistance', 1.5, 'MinPeakHeight', threshold);
 end
 
 % Find three peaks in original raw data time domain
 locs_original = locs;
 
-% ì˜ˆì™¸ ì²˜ë¦¬ false
+% ¿¹¿Ü Ã³¸® false
 if length(locs_original) < 3 && numVib > 1
     check = 0;
 end
@@ -74,13 +92,13 @@ hp_data_wide = filtfilt(b, a, data);
 [b, a] = butter(8, highFreqWide / rate * 2, 'low');  % 700Hz
 hp_data_wide = filtfilt(b, a, hp_data_wide);
 
-hp_data_wide = hp_data_wide(rate* 0.03 : end - rate*0.02,:);  % ë§¨ì•ì´ë‘ ë§¨ë’¤ì— íŠ€ëŠ” ê°’ì´ ìƒê²¨ì„œ ì„ì‹œë¡œ ì˜ë¼ë‘ 
+hp_data_wide = hp_data_wide(rate* 0.03 : end - rate*0.02,:);  % ¸Ç¾ÕÀÌ¶û ¸ÇµÚ¿¡ Æ¢´Â °ªÀÌ »ı°Ü¼­ ÀÓ½Ã·Î Àß¶óµÒ
 
 % Find target(for harmonic freq) and Normalize
 % Z axis
-target_wide = hp_data_wide(:, 3);               % axisSettingì— ì˜í•´ ì›í•˜ëŠ” ì¶•ì˜ ë°ì´í„°ë¥¼ targetì— ëŒ€ì…
-target_wide = target_wide - mean(target_wide);  % ê° ìš”ì†Œ-ì „ì²´ì˜ í‰ê· (í¸ì°¨)
-target_wide = target_wide ./ max(target_wide);  % í¸ì°¨ / ìµœëŒ€í¸ì°¨
+target_wide = hp_data_wide(:, 3);               % axisSetting¿¡ ÀÇÇØ ¿øÇÏ´Â ÃàÀÇ µ¥ÀÌÅÍ¸¦ target¿¡ ´ëÀÔ
+target_wide = target_wide - mean(target_wide);  % °¢ ¿ä¼Ò-ÀüÃ¼ÀÇ Æò±Õ(ÆíÂ÷)
+target_wide = target_wide ./ max(target_wide);  % ÆíÂ÷ / ÃÖ´ëÆíÂ÷
 
 % Y axis
 target_y_wide = hp_data_wide(:, 2);               
@@ -94,16 +112,16 @@ target_x_wide = target_x_wide ./ max(target_x_wide);
 
 %% Cut each signal(cExt) by the peaks, and FFT(cSpec)
 % variables for Data slices & FFT spectrum
-z_slice_w = zeros(numVib, coarseInterval);     % locsê°œ í–‰, rate*3ê°œ ì—´ ì˜í–‰ë ¬ ìƒì„±
+z_slice_w = zeros(numVib, coarseInterval);     % locs°³ Çà, rate*3°³ ¿­ ¿µÇà·Ä »ı¼º
 zSpec_w = zeros(numVib, floor(coarseInterval/2));
-x_slice_w = zeros(numVib, coarseInterval);     % locsê°œ í–‰, rate*3ê°œ ì—´ ì˜í–‰ë ¬ ìƒì„±
+x_slice_w = zeros(numVib, coarseInterval);     % locs°³ Çà, rate*3°³ ¿­ ¿µÇà·Ä »ı¼º
 xSpec_w = zeros(numVib, floor(coarseInterval/2));
-y_slice_w = zeros(numVib, coarseInterval);     % locsê°œ í–‰, rate*3ê°œ ì—´ ì˜í–‰ë ¬ ìƒì„±
+y_slice_w = zeros(numVib, coarseInterval);     % locs°³ Çà, rate*3°³ ¿­ ¿µÇà·Ä »ı¼º
 ySpec_w = zeros(numVib, floor(coarseInterval/2));
 figure();
 if check
     for cnt = 1:numVib
-        % ë” ë„“ì€ êµ¬ê°„(80-700Hz) ëŒ€ì—­ì˜ FFTê²°ê³¼ë¥¼ zSpec_w, ySpec_w, xSpec_wì— ì €ì¥
+        % ´õ ³ĞÀº ±¸°£(80-700Hz) ´ë¿ªÀÇ FFT°á°ú¸¦ zSpec_w, ySpec_w, xSpec_w¿¡ ÀúÀå
         z_slice_w(cnt, :) = target_wide(round((locs_original(cnt) - vibLength - 0.15) * rate) + (1:coarseInterval));
         zSpec_w(cnt, :) = vibFFT(z_slice_w(cnt, :));
         plot(z_slice_w(cnt,:))
@@ -117,24 +135,24 @@ if check
 end
 
 %% Concatenate frequency ranges using Harmonic Frequency
-% Harmonic freqì— í•´ë‹¹í•˜ëŠ” 140-200 / 250-310 / 360-410 / 600-660 Hzì˜ ëŒ€ì—­ì„ í•©ì¹¨
+% Harmonic freq¿¡ ÇØ´çÇÏ´Â 140-200 / 250-310 / 360-410 / 600-660 HzÀÇ ´ë¿ªÀ» ÇÕÄ§
 freqStartIdx = [140, 250, 360, 600];
 freqEndIdx   = [200, 310, 410, 660];
 
-% ì‹¤ì œ FFT ê²°ê³¼ì—ì„œ í•´ë‹¹í•˜ëŠ” ì‹œì‘, ë index(startIdx, endIdx)ë¥¼ êµ¬í•´ ì €ì¥í•˜ê¸° ìœ„í•œ array
+% ½ÇÁ¦ FFT °á°ú¿¡¼­ ÇØ´çÇÏ´Â ½ÃÀÛ, ³¡ index(startIdx, endIdx)¸¦ ±¸ÇØ ÀúÀåÇÏ±â À§ÇÑ array
 fftStartIdx = [];
 fftEndIdx = [];
 
-concatFreqLen = 0; % harmonic frequency ë²”ìœ„ë“¤ì„ í•©ì¹œ ì´í›„ì˜ ê¸¸ì´
+concatFreqLen = 0; % harmonic frequency ¹üÀ§µéÀ» ÇÕÄ£ ÀÌÈÄÀÇ ±æÀÌ
 length_target = max(size(z_slice_w)); 
 
 for i = 1: max(size(freqStartIdx))
     
-    % í•´ë‹¹í•˜ëŠ” ì‹¤ì œ ì¸ë±ìŠ¤(startIdx, endIdx)ë¥¼ ì°¾ê¸°
+    % ÇØ´çÇÏ´Â ½ÇÁ¦ ÀÎµ¦½º(startIdx, endIdx)¸¦ Ã£±â
     startIdx = floor(length_target * freqStartIdx(1, i) / rate);
     endIdx = floor(length_target * freqEndIdx(1, i) / rate);
     
-    % (80-700Hz ëŒ€ì—­ fftê²°ê³¼) ì—ì„œ ì¶”ì¶œí•œ ì‹¤ì œ ì¸ë±ìŠ¤ì˜ ì‹œì‘ê³¼ ë ìœ„ì¹˜ë¥¼ ì €ì¥
+    % (80-700Hz ´ë¿ª fft°á°ú) ¿¡¼­ ÃßÃâÇÑ ½ÇÁ¦ ÀÎµ¦½ºÀÇ ½ÃÀÛ°ú ³¡ À§Ä¡¸¦ ÀúÀå
     fftStartIdx = [fftStartIdx, startIdx];
     fftEndIdx = [fftEndIdx, endIdx];
     
@@ -152,14 +170,14 @@ if check
         tmp_y = [];
         tmp_x = [];
 
-        % 4ê°œì˜ ì£¼íŒŒìˆ˜ range(140-200, 250-310, ...)ì— í•´ë‹¹í•˜ëŠ” ê° ê²°ê³¼ ë²”ìœ„(fftStartIdx:fftEndIdx)ë§Œ ê¸°ì¡´ ìŠ¤í™íŠ¸ëŸ¼ì—ì„œ ì¶”ì¶œí•´ì„œ í•©ì¹˜ê¸°
+        % 4°³ÀÇ ÁÖÆÄ¼ö range(140-200, 250-310, ...)¿¡ ÇØ´çÇÏ´Â °¢ °á°ú ¹üÀ§(fftStartIdx:fftEndIdx)¸¸ ±âÁ¸ ½ºÆåÆ®·³¿¡¼­ ÃßÃâÇØ¼­ ÇÕÄ¡±â
         for idx = 1: max(size(fftStartIdx))
             tmp_z = [tmp_z, zSpec_w(cnt, fftStartIdx(1, idx) : fftEndIdx(1,idx))];
             tmp_y = [tmp_y, ySpec_w(cnt, fftStartIdx(1, idx) : fftEndIdx(1,idx))];
             tmp_x = [tmp_x, xSpec_w(cnt, fftStartIdx(1, idx) : fftEndIdx(1,idx))];
         end
 
-        % ì§„ë™íŒ¨í„´ íšŸìˆ˜ë³„ë¡œ ê²°ê³¼ ì €ì¥
+        % Áøµ¿ÆĞÅÏ È½¼öº°·Î °á°ú ÀúÀå
         zSpec_wide(cnt, :) = tmp_z;
         ySpec_wide(cnt, :) = tmp_y;
         xSpec_wide(cnt, :) = tmp_x;
