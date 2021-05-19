@@ -5,11 +5,10 @@ rate = 1500;
 vibLength = 1.44;
 vibSectionLength = vibLength + 0.3;
 coarseInterval = rate * vibSectionLength;
+numVib = 3;
 
 % File parameter setting
 path = './../Vib-Data/0416data_long_interval/';
-signalfile = './chirp.csv'; 
-signal = csvread(signalfile);
 
 %% Dabin data
 filename_list = {'db1.csv','db2.csv','db3.csv','db4.csv','db5.csv', ...
@@ -19,13 +18,13 @@ filename_list = {'db1.csv','db2.csv','db3.csv','db4.csv','db5.csv', ...
 cnt = 1;
 for i = 1:length(filename_list)
     filename = filename_list{i};
-    [db_x(cnt:cnt+2,:), db_y(cnt:cnt+2,:),db_z(cnt:cnt+2,:), db_xf(cnt:cnt+2,:),db_yf(cnt:cnt+2,:), db_zf(cnt:cnt+2,:)] ...
-    = func_signalcut_by_conv(path, filename, signal, coarseInterval);
+    [db_x(cnt:cnt+2,:), db_y(cnt:cnt+2,:),db_z(cnt:cnt+2,:)] ...
+    = func_signalcut_time_domain (path, filename, coarseInterval, numVib);
 
     for j = 0:2
-       db_x_c(:,:,cnt+j) = real(cwt(db_x(cnt+j, :)));
-       db_y_c(:,:,cnt+j) = real(cwt(db_y(cnt+j, :)));
-       db_z_c(:,:,cnt+j) = real(cwt(db_z(cnt+j, :)));
+       db_x_c(:,:,cnt+j) = abs(cwt(db_x(cnt+j, :)));
+       db_y_c(:,:,cnt+j) = abs(cwt(db_y(cnt+j, :)));
+       db_z_c(:,:,cnt+j) = abs(cwt(db_z(cnt+j, :)));
     end
     
     cnt = cnt+3;
@@ -39,13 +38,13 @@ filename_list = {'hs1.csv','hs2.csv','hs3.csv','hs4.csv','hs5.csv', ...
 cnt = 1;
 for i = 1:length(filename_list)
     filename = filename_list{i};
-    [hs_x(cnt:cnt+2,:), hs_y(cnt:cnt+2,:),hs_z(cnt:cnt+2,:), hs_xf(cnt:cnt+2,:),hs_yf(cnt:cnt+2,:), hs_zf(cnt:cnt+2,:)] ...
-    = func_signalcut_by_conv(path, filename, signal, coarseInterval);
+    [hs_x(cnt:cnt+2,:), hs_y(cnt:cnt+2,:),hs_z(cnt:cnt+2,:)] ...
+    = func_signalcut_time_domain (path, filename, coarseInterval, numVib);
     
     for j = 0:2
-       hs_x_c(:,:,cnt+j) = real(cwt(hs_x(cnt+j, :)));
-       hs_y_c(:,:,cnt+j) = real(cwt(hs_y(cnt+j, :)));
-       hs_z_c(:,:,cnt+j) = real(cwt(hs_z(cnt+j, :)));
+       hs_x_c(:,:,cnt+j) = abs(cwt(hs_x(cnt+j, :)));
+       hs_y_c(:,:,cnt+j) = abs(cwt(hs_y(cnt+j, :)));
+       hs_z_c(:,:,cnt+j) = abs(cwt(hs_z(cnt+j, :)));
     end
     
     cnt = cnt+3;
@@ -59,13 +58,13 @@ filename_list = {'js1.csv','js2.csv','js3.csv','js4.csv','js5.csv', ...
 cnt = 1;
 for i = 1:length(filename_list)
     filename = filename_list{i};
-    [js_x(cnt:cnt+2,:), js_y(cnt:cnt+2,:),js_z(cnt:cnt+2,:), js_xf(cnt:cnt+2,:),js_yf(cnt:cnt+2,:), js_zf(cnt:cnt+2,:)] ...
-    = func_signalcut_by_conv(path, filename, signal, coarseInterval);
+    [js_x(cnt:cnt+2,:), js_y(cnt:cnt+2,:),js_z(cnt:cnt+2,:)] ...
+    = func_signalcut_time_domain (path, filename, coarseInterval, numVib);
 
     for j = 0:2
-       js_x_c(:,:,cnt+j) = real(cwt(js_x(cnt+j, :)));
-       js_y_c(:,:,cnt+j) = real(cwt(js_y(cnt+j, :)));
-       js_z_c(:,:,cnt+j) = real(cwt(js_z(cnt+j, :)));
+       js_x_c(:,:,cnt+j) = abs(cwt(js_x(cnt+j, :)));
+       js_y_c(:,:,cnt+j) = abs(cwt(js_y(cnt+j, :)));
+       js_z_c(:,:,cnt+j) = abs(cwt(js_z(cnt+j, :)));
     end
     
     cnt = cnt+3;
@@ -99,18 +98,24 @@ imagesc(corr_cwt_x)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('xaxis cwt corr')
+% caxis([0.8 1]);
 
 subplot(1,3,2)
 imagesc(corr_cwt_y)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('yaxis cwt corr')
+% caxis([0.8 1]);
 
 subplot(1,3,3)
 imagesc(corr_cwt_z)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('zaxis cwt corr')
+% caxis([0.8 1]);
 
 cwt_all = (cwt_x + cwt_y + cwt_z)/3;
 
@@ -124,4 +129,5 @@ imagesc(corr_cwt_all)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('cwt value avg corr')
 

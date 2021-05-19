@@ -5,11 +5,10 @@ rate = 1500;
 vibLength = 1.44;
 vibSectionLength = vibLength + 0.3;
 coarseInterval = rate * vibSectionLength;
+numVib = 3;
 
 % File parameter setting
 path = './../Vib-Data/0416data_long_interval/';
-signalfile = './chirp.csv'; 
-signal = csvread(signalfile);
 
 %% Dabin data
 filename_list = {'db1.csv','db2.csv','db3.csv','db4.csv','db5.csv', ...
@@ -19,13 +18,13 @@ filename_list = {'db1.csv','db2.csv','db3.csv','db4.csv','db5.csv', ...
 cnt = 1;
 for i = 1:length(filename_list)
     filename = filename_list{i};
-    [db_x(cnt:cnt+2,:), db_y(cnt:cnt+2,:),db_z(cnt:cnt+2,:), db_xf(cnt:cnt+2,:),db_yf(cnt:cnt+2,:), db_zf(cnt:cnt+2,:)] ...
-    = func_signalcut_by_conv(path, filename, signal, coarseInterval);
+    [db_x(cnt:cnt+2,:), db_y(cnt:cnt+2,:),db_z(cnt:cnt+2,:)] ...
+    = func_signalcut_time_domain (path, filename, coarseInterval, numVib);
 
     for j = 0:2
-       db_x_s(:,:,cnt+j) = real(spectrogram(db_x(cnt+j, :), 128, 127, 128));
-       db_y_s(:,:,cnt+j) = real(spectrogram(db_y(cnt+j, :), 128, 127, 128));
-       db_z_s(:,:,cnt+j) = real(spectrogram(db_z(cnt+j, :), 128, 127, 128));
+       db_x_s(:,:,cnt+j) = abs(spectrogram(db_x(cnt+j, :), 128, 64, 128));
+       db_y_s(:,:,cnt+j) = abs(spectrogram(db_y(cnt+j, :), 128, 64, 128));
+       db_z_s(:,:,cnt+j) = abs(spectrogram(db_z(cnt+j, :), 128, 64, 128));
     end
     
     cnt = cnt+3;
@@ -39,13 +38,13 @@ filename_list = {'hs1.csv','hs2.csv','hs3.csv','hs4.csv','hs5.csv', ...
 cnt = 1;
 for i = 1:length(filename_list)
     filename = filename_list{i};
-    [hs_x(cnt:cnt+2,:), hs_y(cnt:cnt+2,:),hs_z(cnt:cnt+2,:), hs_xf(cnt:cnt+2,:),hs_yf(cnt:cnt+2,:), hs_zf(cnt:cnt+2,:)] ...
-    = func_signalcut_by_conv(path, filename, signal, coarseInterval);
+    [hs_x(cnt:cnt+2,:), hs_y(cnt:cnt+2,:),hs_z(cnt:cnt+2,:)] ...
+    = func_signalcut_time_domain (path, filename, coarseInterval, numVib);
     
     for j = 0:2
-       hs_x_s(:,:,cnt+j) = real(spectrogram(hs_x(cnt+j, :), 128, 127, 128));
-       hs_y_s(:,:,cnt+j) = real(spectrogram(hs_y(cnt+j, :), 128, 127, 128));
-       hs_z_s(:,:,cnt+j) = real(spectrogram(hs_z(cnt+j, :), 128, 127, 128));
+       hs_x_s(:,:,cnt+j) = abs(spectrogram(hs_x(cnt+j, :), 128, 64, 128));
+       hs_y_s(:,:,cnt+j) = abs(spectrogram(hs_y(cnt+j, :), 128, 64, 128));
+       hs_z_s(:,:,cnt+j) = abs(spectrogram(hs_z(cnt+j, :), 128, 64, 128));
     end
     
     cnt = cnt+3;
@@ -59,13 +58,13 @@ filename_list = {'js1.csv','js2.csv','js3.csv','js4.csv','js5.csv', ...
 cnt = 1;
 for i = 1:length(filename_list)
     filename = filename_list{i};
-    [js_x(cnt:cnt+2,:), js_y(cnt:cnt+2,:),js_z(cnt:cnt+2,:), js_xf(cnt:cnt+2,:),js_yf(cnt:cnt+2,:), js_zf(cnt:cnt+2,:)] ...
-    = func_signalcut_by_conv(path, filename, signal, coarseInterval);
+    [js_x(cnt:cnt+2,:), js_y(cnt:cnt+2,:),js_z(cnt:cnt+2,:)] ...
+    = func_signalcut_time_domain (path, filename, coarseInterval, numVib);
 
     for j = 0:2
-       js_x_s(:,:,cnt+j) = real(spectrogram(js_x(cnt+j, :), 128, 127, 128));
-       js_y_s(:,:,cnt+j) = real(spectrogram(js_y(cnt+j, :), 128, 127, 128));
-       js_z_s(:,:,cnt+j) = real(spectrogram(js_z(cnt+j, :), 128, 127, 128));
+       js_x_s(:,:,cnt+j) = abs(spectrogram(js_x(cnt+j, :), 128, 64, 128));
+       js_y_s(:,:,cnt+j) = abs(spectrogram(js_y(cnt+j, :), 128, 64, 128));
+       js_z_s(:,:,cnt+j) = abs(spectrogram(js_z(cnt+j, :), 128, 64, 128));
     end
     
     cnt = cnt+3;
@@ -99,18 +98,24 @@ imagesc(corr_stft_x)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('xaxis stft corr')
+% caxis([0.8 1]);
 
 subplot(1,3,2)
 imagesc(corr_stft_y)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('yaxis stft corr')
+% caxis([0.8 1]);
 
 subplot(1,3,3)
 imagesc(corr_stft_z)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('zaxis stft corr')
+% caxis([0.8 1]);
 
 stft_all = (stft_x + stft_y + stft_z)/3;
 
@@ -119,9 +124,11 @@ for r=1:135
         corr_stft_all(r,c) = corr2(stft_all(:,:,r),stft_all(:,:,c));
     end
 end
+
 figure()
 imagesc(corr_stft_all)
 daspect([1 1 1])
 xticks(0:45:135);
 yticks(0:45:135);
+title('stft value avg corr')
 
