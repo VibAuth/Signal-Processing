@@ -23,7 +23,7 @@ test_data(1,:) = (data_xf + data_yf + data_zf)/3;
 path = './Data/';
 idx = 1;
 for cnt=1:userNum
-   corr_file_name = strcat(path, strcat(cnt,'.mat'));
+   corr_file_name = strcat(path, strcat(int2str(cnt),'.mat'));
    load_data = load(corr_file_name, 'avg_all_axis');
    corr_data = getfield(load_data, 'avg_all_axis');
    
@@ -42,7 +42,7 @@ caxis([0.825 1])
 %% KNN
 [euclid, corr_knn, corr_avg, isAttack] = func_knn_classification_final(userNum, nDataPerUser, test_data, nn_k);
 
-if isAttack == 0
+if isAttack == 0 % not attacker
     for i = 1:userNum
         trainingAnswer((i - 1) * nDataPerUser + (1:nDataPerUser)) = i;
     end
@@ -54,7 +54,8 @@ if isAttack == 0
     svm_model_result = predict(svm_model, test_data(1,:));
 
     %% Return the result
-    fprintf("%d, %d, %d, %d, %d\n", euclid, corr_knn, corr_avg, knn_model_result, svm_model_result)
+%     fprintf("%d, %d, %d, %d, %d\n", euclid, corr_knn, corr_avg, knn_model_result, svm_model_result)
+%     fprintf("Attack %d\n",isAttack)
     result = mode([euclid, corr_knn, corr_avg, knn_model_result, svm_model_result]);
 else
     result = 0;

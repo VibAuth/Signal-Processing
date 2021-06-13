@@ -22,6 +22,7 @@ euclidDist.summary(:,1) = class;
  for cnt4 = 1:nData
      euclidDist.dist(1,cnt4) = pdist2(data(1,:),data(cnt4,:),'euclidean');     
  end
+ euclidDist.dist(1,:) = normalize(euclidDist.dist(1,:), 'range');
 
 %% KNN operation
 range = 2:nData;
@@ -30,7 +31,7 @@ curClass = class(range);            % 나머지의 클래스
 
 %% 거리 가까운 k개 데이터 (knn)
 curDist = euclidDist.dist(1, :);
-[~, idx_euclid] = sort(curDist);                % idx_euclid에 curDist의 index값들이 cnt랑 가까운 애들부터 쫙 나옴. 
+[sorted_curDist, idx_euclid] = sort(curDist);                % idx_euclid에 curDist의 index값들이 cnt랑 가까운 애들부터 쫙 나옴. 
 euclidDist.raw(1,:) = class(idx_euclid);      % 그 인덱스들의 class를 저장
 
 nn = euclidDist.raw(1,2:nn_k+1);              % 1번은 자기자신이므로 2부터 nn_k개 가져와서 nn에 저장
@@ -40,7 +41,7 @@ euclid_knn_answer = euclidDist.summary(1,2);
 k_dist_avg = sum(sorted_curDist(2:nn_k+1))/nn_k;
 
  %% 유사도 높은 k개 클래스 구하기 (knn)
-[~, idx] = sort(curData, 'descend');            % corr내림차순 소팅; idx에 cnt와 유사도 높은 순서로 인덱스 넣음
+[sorted_curData, idx] = sort(curData, 'descend');            % corr내림차순 소팅; idx에 cnt와 유사도 높은 순서로 인덱스 넣음
 corrResult.raw(1, :) = curClass(idx);             % result.raw에 class 입력; cnt번째 데이터와 유사도가 높은 순서로 클래스 입력함.
 nn = corrResult.raw(1,1:nn_k);
 corrResult.summary(1,2) = mode(nn);
@@ -63,7 +64,7 @@ highest_corr_val = corrResult.summary2(1,3);
 
 %% attacker 구분
 
-% fprintf("k_dist_avg %f    ", k_dist_avg);
+fprintf("k_dist_avg %f    \n", k_dist_avg);
 
 registeredData = corrData(2:end,2:end);
 registered_corr_avg = 0;
@@ -72,25 +73,30 @@ for cnt = 1:userNum
     registered_corr_avg = registered_corr_avg + sum(temp, 'all')/numel(temp);
 end
 registered_corr_avg = registered_corr_avg/userNum;
-% fprintf("registered_corr_avg %f    ", registered_corr_avg);
-% fprintf("k_corr_avg %f    ", k_corr_avg);
+
+
 
 top5prc = prctile(registeredData, 95);
 top5prc_avg = sum(top5prc, 'all')/numel(top5prc);
-% fprintf("top 5 percent avg %f    ", top5prc_avg);
-% fprintf("highest_corr_val %f    ", highest_corr_val);
+
 
 
 isAttack = 0;
 if k_dist_avg > 0.2
     isAttack = isAttack + 1;
 end
-if k_corr_avg < top5prc_avg+0.02
+if k_corr_avg < top5prc_avg + 0.01
     isAttack = isAttack + 1;
 end
 if highest_corr_val < registered_corr_avg
     isAttack = isAttack + 1;
 end
+    
+%     fprintf("k_corr_avg %f    ", k_corr_avg);
+%     fprintf("top 5 percent avg %f    \n", top5prc_avg);
+%     fprintf("highest_corr_val %f    ", highest_corr_val);
+%     fprintf("registered_corr_avg %f    \n", registered_corr_avg);
+
 
 if isAttack >= 2
     isAttack = 1;

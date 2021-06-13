@@ -3,7 +3,7 @@ import pandas as pd
 
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('192.168.137.192', 50007))
+        s.connect(('192.168.137.126', 50007))
         fileNum = s.recv(100)
         fileNum = fileNum.decode()
         

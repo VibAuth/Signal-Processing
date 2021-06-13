@@ -334,7 +334,7 @@ if check
         xSpec_wide(cnt, :) = tmp_x * xWeight_all(cnt);
         ySpec_wide(cnt, :) = tmp_y * yWeight_all(cnt);
         zSpec_wide(cnt, :) = tmp_z * zWeight_all(cnt);
-        disp([ cnt, " slice weight ",  xWeight_all(cnt), yWeight_all(cnt), zWeight_all(cnt)]);
+%         disp([ cnt, " slice weight ",  xWeight_all(cnt), yWeight_all(cnt), zWeight_all(cnt)]);
     end
 end
 

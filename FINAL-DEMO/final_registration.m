@@ -1,7 +1,7 @@
 close all;
 clearvars;
 
-userNum = 14;
+userNum = 9;
 
 %% Get registration data
 

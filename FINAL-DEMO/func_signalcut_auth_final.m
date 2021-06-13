@@ -267,24 +267,24 @@ if check
         xSpec_wide(cnt, :) = tmp_x * xWeight_all(cnt);
         ySpec_wide(cnt, :) = tmp_y * yWeight_all(cnt);
         zSpec_wide(cnt, :) = tmp_z * zWeight_all(cnt);
-        disp([ cnt, " slice weight ",  xWeight_all(cnt), yWeight_all(cnt), zWeight_all(cnt)]);
+%         disp([ cnt, " slice weight ",  xWeight_all(cnt), yWeight_all(cnt), zWeight_all(cnt)]);
     end
 end
 
 
-% % HS debug
-% figure('units', 'normalized','outerposition', [0 0.5 1 0.5]);
-% subplot 131
-% plot(x_slice_w(1,:))
-% legend('x slice #1')
-% xlim([0 max(size(x_slice_w(1,:)))])
-% 
-% subplot 132
-% plot(y_slice_w(1,:))
-% legend('y slice #1')
-% xlim([0 max(size(y_slice_w(1,:)))])
-% 
-% subplot 133
-% plot(z_slice_w(1,:))
-% legend('z slice #1')
-% xlim([0 max(size(z_slice_w(1,:)))])
+% HS debug
+figure('units', 'normalized','outerposition', [0 0.5 1 0.5]);
+subplot 131
+plot(x_slice_w(1,:))
+legend('x slice #1')
+xlim([0 max(size(x_slice_w(1,:)))])
+
+subplot 132
+plot(y_slice_w(1,:))
+legend('y slice #1')
+xlim([0 max(size(y_slice_w(1,:)))])
+
+subplot 133
+plot(z_slice_w(1,:))
+legend('z slice #1')
+xlim([0 max(size(z_slice_w(1,:)))])
